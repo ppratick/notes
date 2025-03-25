@@ -73,3 +73,93 @@ restoreRight(Black(d1,x,Red(d2,y,Red(d3,z,d4)))) =
 
 | restoreRight d = d
 ```
+## Inserting 
+#### `ins` and `insert` Functions
+
+```sml
+(* 
+  ins : 'a dict -> 'a dict
+
+  REQUIRES: d is RBT.
+
+  ENSURES: ins(Black(t)) is RBT,  
+           ins(Red(t)) is ARBT.  
+
+  Recall: e as (k, v) is in scope.
+*)
+
+fun ins (Empty) = Red(Empty, e, Empty)
+
+| ins (Black(l, e' as (k', _), r)) =
+    (case String.compare(k, k') of
+        EQUAL => Black(l, e, r) (* replace *)
+      | LESS => restoreLeft(Black(ins(l), e', r))
+      | _ => restoreRight(Black(l, e', ins(r))))
+
+| ins (Red(l, e' as (k', _), r)) =
+    (case String.compare(k, k') of
+        EQUAL => Red(l, e, r) (* replace *)
+      | LESS => Red(ins(l), e', r)
+      | GREATER => Red(l, e', ins(r)))
+
+(* 
+  insert : 'a dict * 'a entry -> 'a dict
+
+  REQUIRES and ENSURES RBT.
+*)
+
+fun insert (d, e as (k, v)) =
+    let
+    (* ins : 'a dict -> 'a dict
+		REQUIRES: d is RBT.
+		ENSURES: ins(Black(t)) is RBT,  
+		         ins(Red(t)) is ARBT.  
+		Recall: e as (k, v) is in scope.*)
+        fun ins (Empty) = Red(Empty, e, Empty)
+		  | ins (Black(l, e' as (k', _), r)) =
+            (case String.compare(k, k') of
+                EQUAL => Black(l, e, r) (* replace *)
+              | LESS => restoreLeft(Black(ins(l), e', r))
+              | _ => restoreRight(Black(l, e', ins(r))))
+
+          | ins (Red(l, e' as (k', _), r)) =
+            (case String.compare(k, k') of
+                EQUAL => Red(l, e, r) (* replace *)
+              | LESS => Red(ins(l), e', r)
+              | GREATER => Red(l, e', ins(r)))
+    in
+        (case ins(d) of
+            Red(t as (Red(_, _, _), _, _)) => Black(t)
+          | Red(t as (_, _, Red(_, _, _))) => Black(t)
+          | d' => d')
+    end
+
+(* 
+  Here is an acceptable alternate for the case:
+*)
+
+(case ins(d) of
+    Red(t) => Black(t)
+  | d' => d')
+  ```
+## Lookup
+#### `lookup` Function
+
+```sml
+(* lookup : 'a dict -> key -> 'a option *)
+
+fun lookup d k =
+    let
+        fun lk (Empty) = NONE
+          | lk (Red t) = lk' t
+          | lk (Black t) = lk' t
+
+        and lk' (l, (k', v), r) =
+            (case String.compare(k, k') of
+                EQUAL => SOME(v)
+              | LESS => lk(l)
+              | GREATER => lk(r))
+    in
+        lk d
+    end
+    ```
