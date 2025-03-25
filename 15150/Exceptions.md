@@ -73,9 +73,7 @@ fun f (x : 'a) : unit =
 9. `(if raise Eyebrows then raise Suspicion else 1.0) handle Eyebrows => 2.0` – Catches the `Eyebrows` exception and returns `2.0`.  
 10. `(raise Suspicion, raise Eyebrows) handle Suspicion => 3 | _ => 4` – Pattern matching on exception tuples.  
 11. `(raise Suspicion, raise Eyebrows) handle _ => ("cat", 3)` – Returns `("cat", 3)` after catching the exception.  
-
 ---
-
 ## Type Solutions
 1. **Type:** `string -> exn` – Evaluates to the value `Fail` (constructors are values).  
 2. **Type:** `exn` – Evaluates to the value `Fail "hmm"`.  

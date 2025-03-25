@@ -73,7 +73,7 @@ fun csum [] k = k 0
 
 ## Example 2: Success and Failure Continuations
 ```sml
-fun search _ Empty _ fc = fc ()
+fun search p Empty sc fc = fc ()
   | search p (Node (l, x, r)) sc fc =
 	if p x then sc x
 	else search p l sc (fn () => search p r sc fc)
