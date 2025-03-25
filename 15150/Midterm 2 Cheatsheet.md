@@ -1,4 +1,3 @@
-# 15-150 Cheatsheet
 ## Built-in Comparison Operators
 - Operators: `>`, `<`, `>=`, `<=`
 - Operate on: `int`, `string`, `char`, `real`
@@ -60,6 +59,12 @@
 $$
 \sum_{i=0}^{\#\text{ levels}} (\text{nodes @ level } i) \times (\text{work per node @ level } i)
 $$
+## Polymorphism
+**(a)** There are no values of type `' a`.
+**(b)** There are expressions of type `' a`. (Ex. `raise ____`)
+**(c)** There are values of type `'a list`. (Ex. `[]`)
+**(d)** There are function values of type `'a -> 'b` (Ex. `fun loop x = loop x`).
+**(e)** There are no total function values of type `' a -> 'b`
 ## Hofs
 ```sml
 (* 1. map : ('a -> 'b) -> 'a list -> 'b list *)
@@ -88,7 +93,6 @@ fun f o g = fn x => f (g x)
 fun rev L = foldL (op ::) [] L  (* NOT Point-Free Programming *)
 val rev = foldL (op ::) []      (* Point-Free Programming *)
 ```
-#### STAGING
 ## CPS
 ```sml
 (* search : ('a -> bool) -> 'a tree -> ('a -> 'b) -> (unit -> 'b) -> 'b *)
@@ -166,7 +170,6 @@ This defines a datatype regexp with the following constructors:
 - Plus (a, b) – Represents the union of two languages.
 - Times (a, b) – Represents the concatenation of two languages.
 - Star a – Represents the repetition of a language.
----
 **Matching Semantics**
 1. Zero matches nothing.
 2. One matches the empty string "".
@@ -174,7 +177,6 @@ This defines a datatype regexp with the following constructors:
 4. Plus (a, b) matches if either a or b matches.
 5. Times (a, b) matches if a followed by b matches.
 6. Star a matches zero or more repetitions of a.
----
 ```sml
 fun match (Char a) cs k = 
 		(case cs of [] => false 
@@ -187,4 +189,33 @@ fun match (Char a) cs k =
 						  match r cs (fn cs' => match (Star r) cs' k) 
   
 fun accept r s = match r (String.explode s) List.null
+```
+
+```sml
+val REJECT : matcher = fn _ => fn _ => false
+val ACCEPT : matcher = fn cs => fn k => k (cs)
+val CHECK_FOR (a : char) : matcher = 
+		fn [] => REJECT
+		 | c::cs => if (a = c)
+					then ACCEPT cs
+					else REJECT cs
+fun (m1 ORELSE m2) cs k = m1 cs k orelse m2 cs k
+fun (m1 THEN m2) cs k = m1 cs (fn cs' => m2 cs' k)
+fun REPEAT m cs k = 
+		let 
+			fun mstar cs' = kEs' orelse 
+							m cs' (fn cs => properSuffix (cs'', cs') andalso
+											mstar cs'') 
+		in 
+			mstar cs 
+		end
+```
+
+```sml
+fun match (char(a) : regexp) : matcher = CHECK_FOR a
+  | match (Zero) = REJECT
+  | match (One) = ACCEPT
+  | match (Plus (r1, r2)) = match r1 ORELSE match r2
+  | match (Times (r1, r2)) = match r1 THEN match r2
+  | match (Star r) = REPEAT (match r)
 ```
