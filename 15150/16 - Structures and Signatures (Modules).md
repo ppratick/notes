@@ -1,5 +1,5 @@
 # Syntax
-### Structure
+### Signature Syntax 
 ```sml
 signature SIG_NAME =
 sig
